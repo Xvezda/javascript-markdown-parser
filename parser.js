@@ -8,61 +8,81 @@ function peek(tokens, index) {
   return tokens[index];
 }
 
-function handleTitle(tokens, index) {
-  const [block, i] = handleWord(tokens, index+1);
+function skipWhitespace(tokens, index) {
+  let i;
+  for (
+    i = index;
+    peek(tokens, i).type === 'SPACE' ||
+    peek(tokens, i).type === 'LINEBREAK';
+    ++i
+  );
+  return i;
+}
 
+function handleTitle(tokens, index) {
+  const children = [];
+  let i;
+  for (
+    i = index + 1;
+    i < tokens.length && tokens[i].type !== 'LINEBREAK';
+    ++i
+  ) {
+    children.push({
+      type: tokens[i].type,
+      payload: {
+        value: tokens[i].value,
+      }
+    });
+  }
   return [
     {
       type: 'TITLE',
       payload: {
         level: tokens[index].value.length,
-        content: block.payload.value,
+        children,
       }
     },
-    i
-  ];
-}
-
-function handleLinebreak(tokens, index) {
-  if (tokens[index].value.length < 2) {
-    return [
-      null,
-      index + 1,
-    ];
-  }
-
-  return [
-    ({
-      type: 'LINEBREAK',
-      payload: {
-        count: tokens[index].value.match(/\n{2}/g).length,
-      }
-    }),
-    index + 1,
+    skipWhitespace(tokens, i)
   ];
 }
 
 function handleWord(tokens, index) {
+  let i;
   const words = [];
-  let i = index;
-  while (
-    peek(tokens, i).type === 'WORD' ||
-    peek(tokens, i).type === 'SPACE' &&
-    peek(tokens, i).value.length < 2 ||
-    peek(tokens, i).type === 'LINEBREAK' &&
-    peek(tokens, i).value.length < 2
-  ) {
-    words.push(tokens[i].value);
-    ++i;
+  for (i = index; i < tokens.length; ++i) {
+    if (peek(tokens, i).type === 'LINEBREAK') {
+      if (peek(tokens, i+1).type === 'LINE') {
+        return [
+          {
+            type: 'TITLE',
+            payload: {
+              level: 2,
+              children: words,
+            }
+          },
+          i + 3
+        ];
+      }
+      if (peek(tokens, i).value.length > 1) {
+        ++i;
+        break;
+      }
+    }
+    words.push({
+      type: tokens[i].type,
+      payload: {
+        value: tokens[i].value,
+      }
+    });
   }
   return [
     {
-      type: 'SENTENCE',
+      type: 'PARAGRAPH',
       payload: {
-        value: words.join(''),
-      },
+        children: words,
+      }
     },
-    i,
+    i
   ];
 }
 
@@ -82,59 +102,20 @@ module.exports = function parser(tokens) {
         ++i;
         continue;
       case 'LINEBREAK': {
-        const [block, index] = handleLinebreak(tokens, i);
-        if (!block) {
-          ++i;
-          continue;
+        if (tokens[i].value.length < 2) {
+          blocks.push({
+            type: 'LINEBREAK'
+          });
         }
+        ++i;
+        continue;
+      }
+      case 'SPACE':
+      case 'WORD':
+        const [block, index] = handleWord(tokens, i);
         blocks.push(block);
         i = index;
         continue;
-      }
-      case 'SPACE': {
-        if (
-          token.value.length === 2 &&
-          peek(tokens, i+1).type === 'LINEBREAK'
-        ) {
-          blocks.push({
-            type: 'LINEBREAK',
-            payload: {
-              count: peek(tokens, i+1).value.length,
-            }
-          });
-          i += 2;
-        } else {
-          tokens.push({
-            type: 'SPACE',
-          });
-          ++i;
-        }
-        break;
-      }
-      case 'WORD': {
-        const [block, index] = handleWord(tokens, i);
-        if (
-          peek(tokens, index).type === 'LINE'
-        ) {
-          blocks.push({
-            type: 'TITLE',
-            payload: {
-              level: 1,
-              content: block.payload.value,
-            }
-          });
-          i = index + 1;
-        } else {
-          blocks.push({
-            type: 'SENTENCE',
-            payload: {
-              value: block.payload.value,
-            }
-          });
-          i = index;
-        }
-        break;
-      }
       default:
         throw new Error(
           `unexpected token: ${token.type}:${token.value}`);
