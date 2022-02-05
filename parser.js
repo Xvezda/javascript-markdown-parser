@@ -1,8 +1,10 @@
 function peek(tokens, index) {
   if (!tokens[index]) {
     return {
-      type: 'EOF',
-      value: null
+      type: 'END',
+      payload: {
+        value: null
+      }
     }
   }
   return tokens[index];
@@ -13,7 +15,7 @@ function skipWhitespace(tokens, index) {
   for (
     i = index;
     peek(tokens, i).type === 'SPACE' ||
-    peek(tokens, i).type === 'LINEBREAK';
+    peek(tokens, i).type === 'LINE_BREAK';
     ++i
   );
   return i;
@@ -22,23 +24,17 @@ function skipWhitespace(tokens, index) {
 function handleTitle(tokens, index) {
   const children = [];
   let i;
-  for (
-    i = index + 1;
-    i < tokens.length && tokens[i].type !== 'LINEBREAK';
-    ++i
-  ) {
-    children.push({
-      type: tokens[i].type,
-      payload: {
-        value: tokens[i].value,
-      }
-    });
+  for (i = index + 1; i < tokens.length; ++i) {
+    if (tokens[i].type === 'LINE_BREAK') {
+      break;
+    }
+    children.push(tokens[i]);
   }
   return [
     {
       type: 'TITLE',
       payload: {
-        level: tokens[index].value.length,
+        level: tokens[index].payload.value.length,
         children,
       }
     },
@@ -46,47 +42,106 @@ function handleTitle(tokens, index) {
   ];
 }
 
-function handleWord(tokens, index) {
+function handleLink(tokens, index) {
+  const children = [];
+
   let i;
-  const words = [];
-  for (i = index; i < tokens.length; ++i) {
-    if (peek(tokens, i).type === 'LINEBREAK') {
-      if (peek(tokens, i+1).type === 'LINE') {
-        return [
-          {
-            type: 'TITLE',
-            payload: {
-              level: 2,
-              children: words,
-            }
-          },
-          i + 3
-        ];
-      }
-      if (peek(tokens, i).value.length > 1) {
-        ++i;
-        break;
-      }
+  for (i = index + 1; i < tokens.length; ++i) {
+    if (tokens[i].type === 'CLOSE_BRACKET') {
+      ++i;
+      break;
     }
-    words.push({
-      type: tokens[i].type,
-      payload: {
-        value: tokens[i].value,
-      }
-    });
+    children.push(tokens[i]);
   }
+
+  if (tokens[i].type !== 'OPEN_PAREN') {
+    return [null, index];
+  }
+  ++i;
+
+  let address = '';
+  for (; i < tokens.length; ++i) {
+    if (tokens[i].type === 'CLOSE_PAREN') {
+      ++i;
+      break;
+    }
+    address += tokens[i].payload.value;
+  }
+
   return [
     {
-      type: 'PARAGRAPH',
+      type: 'LINK',
       payload: {
-        children: words,
+        address,
+        children: handleInline(children),
       }
     },
     i
   ];
 }
 
-module.exports = function parser(tokens) {
+function handleInline(tokens) {
+  const children = [];
+  for (let i = 0; i < tokens.length; ++i) {
+    switch (tokens[i].type) {
+      case 'OPEN_BRACKET':
+        const [link, index] = handleLink(tokens, i);
+        if (!link) {
+          children.push(tokens[i]);
+          ++i;
+          continue;
+        }
+        children.push(link);
+        i = index;
+        break;
+      default:
+        children.push(tokens[i]);
+        break;
+    }
+  }
+  return children;
+}
+
+function handleWord(tokens, index) {
+  const children = [];
+  let i;
+  for (i = index; i < tokens.length; ++i) {
+    if (tokens[i].type === 'LINE_BREAK') {
+      if (peek(tokens, i+1).type === 'LINE') {
+        return [
+          {
+            type: 'TITLE',
+            payload: {
+              level: 2,
+              children: handleInline(children),
+            }
+          },
+          skipWhitespace(tokens, i + 2),
+        ];
+      }
+    }
+    if (
+      tokens[i].type === 'LINE_BREAK' &&
+      tokens[i].payload.value.length > 1 ||
+      tokens[i].type === 'LINE'
+    ) {
+      break;
+    }
+    children.push(tokens[i]);
+  }
+
+  return [
+    {
+      type: 'PARAGRAPH',
+      payload: {
+        children: handleInline(children),
+      }
+    },
+    skipWhitespace(tokens, i),
+  ];
+}
+
+function parser(tokens) {
   const blocks = [];
   for (let i = 0; i < tokens.length; ) {
     const token = tokens[i];
@@ -99,26 +154,18 @@ module.exports = function parser(tokens) {
       }
       case 'LINE':
         blocks.push({ type: 'LINE' });
-        ++i;
+        i = skipWhitespace(tokens, i+1);
         continue;
-      case 'LINEBREAK': {
-        if (tokens[i].value.length < 2) {
-          blocks.push({
-            type: 'LINEBREAK'
-          });
-        }
-        ++i;
-        continue;
-      }
       case 'SPACE':
-      case 'WORD':
+      case 'WORD': {
         const [block, index] = handleWord(tokens, i);
         blocks.push(block);
         i = index;
         continue;
+      }
       default:
         throw new Error(
-          `unexpected token: ${token.type}:${token.value}`);
+          `unexpected token: ${i}:${token.type}:${token.payload.value}`);
     }
   }
 
@@ -129,3 +176,4 @@ module.exports = function parser(tokens) {
     }
   };
 }
+module.exports = parser;
