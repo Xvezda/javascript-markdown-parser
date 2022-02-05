@@ -1,0 +1,8 @@
+{
+  "name": "@xvzd/markdown-parser",
+  "version": "0.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:Xvezda/javascript-markdown-parser.git",
+  "author": "Xvezda <xvezda@naver.com>",
+  "license": "MIT"
+}
