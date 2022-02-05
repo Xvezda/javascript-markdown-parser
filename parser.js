@@ -14,8 +14,8 @@ function skipWhitespace(tokens, index) {
   let i;
   for (
     i = index;
-    peek(tokens, i).type === 'SPACE' ||
-    peek(tokens, i).type === 'LINE_BREAK';
+    tokens[i].type === 'SPACE' ||
+    tokens[i].type === 'LINE_BREAK';
     ++i
   );
   return i;
