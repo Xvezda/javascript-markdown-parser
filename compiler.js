@@ -9,34 +9,31 @@ function wrap(tag, inner, attrs = {}) {
   return `<${tag}${buildAttributes(attrs)}>${inner}</${tag}>`;
 }
 
-module.exports = function compiler({ type, payload }) {
+function compileChildren(children) {
+  return children
+    .filter((child, i) =>
+      !(i === children.length-1 && child.type === 'LINE_BREAK'))
+    .map(compiler)
+    .join('')
+    .trim();
+}
+
+function compiler({ type, payload }) {
   switch (type) {
     case 'DOCUMENT':
-      return payload.blocks.map(compiler).join('');
+      return compileChildren(payload.blocks);
     case 'LINE':
       return '<hr>';
     case 'LINE_BREAK':
       return '<br>';
     case 'TITLE':
-      return wrap(
-        `h${payload.level}`,
-        payload.children.map(compiler).join('').trim()
-      );
+      return wrap(`h${payload.level}`, compileChildren(payload.children));
     case 'PARAGRAPH':
-      return wrap(
-        'p',
-        payload.children
-          .filter((child, i) =>
-            !(i === payload.children.length-1 &&
-              child.type === 'LINE_BREAK'))
-          .map(compiler)
-          .join('')
-          .trim()
-      );
+      return wrap('p', compileChildren(payload.children));
     case 'LINK':
       return wrap(
         'a',
-        payload.children.map(compiler).join(''),
+        compileChildren(payload.children),
         {href: payload.address}
       );
     case 'WORD':
@@ -44,3 +41,4 @@ module.exports = function compiler({ type, payload }) {
       return payload.value;
   }
 };
+module.exports = compiler;
