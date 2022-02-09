@@ -4,5 +4,8 @@
   "main": "index.js",
   "repository": "git@github.com:Xvezda/javascript-markdown-parser.git",
   "author": "Xvezda <xvezda@naver.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "jest": "^27.5.1"
+  }
 }
