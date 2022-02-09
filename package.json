@@ -11,5 +11,8 @@
   "devDependencies": {
     "jest": "^27.5.1",
     "prettier": "^2.5.1"
+  },
+  "jest": {
+    "snapshotSerializers": ["<rootDir>/snapshot-serializer.js"]
   }
 }
