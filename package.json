@@ -6,6 +6,7 @@
   "author": "Xvezda <xvezda@naver.com>",
   "license": "MIT",
   "devDependencies": {
-    "jest": "^27.5.1"
+    "jest": "^27.5.1",
+    "prettier": "^2.5.1"
   }
 }
