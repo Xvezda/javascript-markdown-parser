@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`마크다운 변환 1`] = `
+<h1>hello world</h1>
+<h2>hi</h2>
+<h2>foobar</h2>
+<p>egg<br />ham<br />spam</p>
+<p>link to <a href="http://google.com">Google</a></p>
+`;
