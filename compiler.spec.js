@@ -61,3 +61,7 @@ bar
 `;
   expect(mdToHtml(p)).toMatchSnapshot();
 });
+
+test('링크', () => {
+  expect(mdToHtml('[google](https://www.google.com)')).toMatchSnapshot();
+});
