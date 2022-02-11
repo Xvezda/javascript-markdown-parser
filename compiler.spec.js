@@ -65,3 +65,8 @@ bar
 test('링크', () => {
   expect(mdToHtml('[google](https://www.google.com)')).toMatchSnapshot();
 });
+
+test('이미지', () => {
+  expect(mdToHtml('![random image](https://unsplash.it/100)'))
+    .toMatchSnapshot();
+});
