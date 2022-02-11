@@ -1,9 +1,18 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`마크다운 변환 1`] = `
+exports[`링크 1`] = `<p><a href="https://www.google.com">google</a></p>`;
+
+exports[`복합 마크다운 변환 1`] = `
 <h1>hello world</h1>
 <h2>hi</h2>
 <h2>foobar</h2>
 <p>egg<br />ham<br />spam</p>
 <p>link to <a href="http://google.com">Google</a></p>
+`;
+
+exports[`줄바꿈 1`] = `<p>foo<br />bar</p>`;
+
+exports[`줄바꿈 2`] = `
+<p>foo</p>
+<p>bar</p>
 `;
