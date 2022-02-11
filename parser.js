@@ -10,21 +10,34 @@ function peek(tokens, index) {
   return tokens[index];
 }
 
-function skipWhitespace(tokens, index) {
+const skip = condition => (tokens, index) => {
   let i;
   for (
     i = index;
     i < tokens.length &&
-    (tokens[i].type === 'SPACE' || tokens[i].type === 'LINE_BREAK');
+    (typeof condition === 'function' ?
+    condition(tokens, i) :
+    tokens[i].type === condition);
     ++i
   );
   return i;
-}
+};
+
+const skipWhitespace = skip((tokens, i) =>
+  tokens[i].type === 'SPACE' || tokens[i].type === 'LINE_BREAK');
 
 function handleTitle(tokens, index) {
-  const children = [];
   let i;
-  for (i = index + 1; i < tokens.length; ++i) {
+  for (i = index; i < tokens.length; ++i) {
+    if (tokens[i].type !== 'SHARP')
+      break;
+  }
+  if (tokens[i].type !== 'SPACE') {
+    return [null, index];
+  }
+  const level = i - index;
+  const children = [];
+  for (; i < tokens.length; ++i) {
     if (tokens[i].type === 'LINE_BREAK') {
       break;
     }
@@ -34,7 +47,7 @@ function handleTitle(tokens, index) {
     {
       type: 'TITLE',
       payload: {
-        level: tokens[index].payload.value.length,
+        level,
         children,
       }
     },
@@ -107,16 +120,21 @@ function handleWord(tokens, index) {
   let i;
   for (i = index; i < tokens.length; ++i) {
     if (tokens[i].type === 'LINE_BREAK') {
-      if (peek(tokens, i+1).type === 'LINE') {
+      if (
+        peek(tokens, i+1).type === 'EQUAL' ||
+        peek(tokens, i+1).type === 'DASH'
+      ) {
+        const type = peek(tokens, i+1).type;
+        i = skip(type)(tokens, i+1);
         return [
           {
             type: 'TITLE',
             payload: {
-              level: 2,
+              level: ({'EQUAL': 1, 'DASH': 2})[type],
               children: handleInline(children),
             }
           },
-          skipWhitespace(tokens, i + 2),
+          skipWhitespace(tokens, i),
         ];
       }
     }
@@ -146,16 +164,26 @@ function parser(tokens) {
   for (let i = 0; i < tokens.length; ) {
     const token = tokens[i];
     switch (token.type) {
-      case 'TITLE': {
+      case 'DASH':
+        if (
+          peek(tokens, i+1).type === 'DASH' &&
+          peek(tokens, i+2).type === 'DASH'
+        ) {
+          blocks.push({ type: 'LINE' });
+          i = skipWhitespace(tokens, i+1);
+          continue;
+        }
+        // fallthrough
+      case 'SHARP': {
         const [block, index] = handleTitle(tokens, i);
-        blocks.push(block);
-        i = index;
-        continue;
+        if (block) {
+          blocks.push(block);
+          i = index;
+          continue;
+        }
+        // fallthrough
       }
-      case 'LINE':
-        blocks.push({ type: 'LINE' });
-        i = skipWhitespace(tokens, i+1);
-        continue;
+      case 'OPEN_BRACKET':
       case 'SPACE':
       case 'WORD': {
         const [block, index] = handleWord(tokens, i);

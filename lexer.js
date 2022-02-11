@@ -1,8 +1,10 @@
 function getType(token) {
-  if (/\#+/.test(token)) {
-    return 'TITLE';
-  } else if (/\-{3,}/.test(token)) {
-    return 'LINE';
+  if (token === '#') {
+    return 'SHARP';
+  } else if (token === '-') {
+    return 'DASH';
+  } else if (token === '=') {
+    return 'EQUAL';
   } else if (/ +/.test(token)) {
     return 'SPACE';
   } else if (/\n+/.test(token)) {
