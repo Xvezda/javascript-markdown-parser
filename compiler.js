@@ -36,6 +36,10 @@ function compiler({ type, payload }) {
         compileChildren(payload.children),
         {href: payload.address}
       );
+    case 'IMAGE':
+      return `
+        <img src="${payload.url}" alt="${payload.alt}">
+      `.trim();
     case 'WORD':
     default:
       return payload.value;

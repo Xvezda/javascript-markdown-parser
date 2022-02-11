@@ -5,6 +5,8 @@ function getType(token) {
     return 'DASH';
   } else if (token === '=') {
     return 'EQUAL';
+  } else if (token === '!') {
+    return 'BANG';
   } else if (/ +/.test(token)) {
     return 'SPACE';
   } else if (/\n+/.test(token)) {

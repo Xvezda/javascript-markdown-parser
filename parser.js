@@ -97,7 +97,27 @@ function handleInline(tokens) {
   const children = [];
   for (let i = 0; i < tokens.length; ++i) {
     switch (tokens[i].type) {
-      case 'OPEN_BRACKET':
+      case 'BANG': {
+        if (peek(tokens, i+1).type === 'OPEN_BRACKET') {
+          const [link, index] = handleLink(tokens, i+1);
+          if (!link) {
+            children.push(tokens[i]);
+            ++i;
+            continue;
+          }
+          children.push({
+            type: 'IMAGE',
+            payload: {
+              url: link.payload.address,
+              alt: link.payload.children
+                .map(({ payload }) => payload.value).join(''),
+            },
+          });
+          i = index;
+        }
+        break;
+      }
+      case 'OPEN_BRACKET': {
         const [link, index] = handleLink(tokens, i);
         if (!link) {
           children.push(tokens[i]);
@@ -107,6 +127,7 @@ function handleInline(tokens) {
         children.push(link);
         i = index;
         break;
+      }
       default:
         children.push(tokens[i]);
         break;
@@ -183,6 +204,7 @@ function parser(tokens) {
         }
         // fallthrough
       }
+      case 'BANG':
       case 'OPEN_BRACKET':
       case 'SPACE':
       case 'WORD': {
