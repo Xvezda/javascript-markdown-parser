@@ -14,6 +14,8 @@ exports[`올바르지 않은 제목 문법 처리 1`] = `<p>#foo</p>`;
 
 exports[`올바르지 않은 제목 문법 처리 2`] = `<p>foo<br />---=</p>`;
 
+exports[`올바르지 않은 제목 문법 처리 3`] = `<p>####### foo</p>`;
+
 exports[`이미지 1`] = `<p><img src="https://unsplash.it/100" alt="random image" /></p>`;
 
 exports[`줄바꿈 1`] = `<p>foo<br />bar</p>`;

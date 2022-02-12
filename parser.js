@@ -35,7 +35,12 @@ function handleTitle(tokens, index) {
   if (tokens[i].type !== 'SPACE') {
     return [null, index];
   }
+
   const level = i - index;
+  if (6 < level) {
+    return [null, index];
+  }
+
   const children = [];
   for (; i < tokens.length; ++i) {
     if (tokens[i].type === 'LINE_BREAK') {

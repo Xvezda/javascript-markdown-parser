@@ -56,6 +56,9 @@ foo
 ---=
 `
   expect(mdToHtml(invalidLine)).toMatchSnapshot();
+
+  const levelSeven = '#'.repeat(7) + ' foo';
+  expect(mdToHtml(levelSeven)).toMatchSnapshot();
 });
 
 test('줄바꿈', () => {
