@@ -47,6 +47,17 @@ foo
   expect(mdToHtml(h2)).toMatch('<h2>foo</h2>');
 });
 
+test('올바르지 않은 제목 문법 처리', () => {
+  const noSpace = '#foo';
+  expect(mdToHtml(noSpace)).toMatchSnapshot();
+
+  const invalidLine = `\
+foo
+---=
+`
+  expect(mdToHtml(invalidLine)).toMatchSnapshot();
+});
+
 test('줄바꿈', () => {
   const br = `\
 foo

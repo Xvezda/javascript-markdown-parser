@@ -147,16 +147,18 @@ function handleWord(tokens, index) {
       ) {
         const type = peek(tokens, i+1).type;
         i = skip(type)(tokens, i+1);
-        return [
-          {
-            type: 'TITLE',
-            payload: {
-              level: ({'EQUAL': 1, 'DASH': 2})[type],
-              children: handleInline(children),
-            }
-          },
-          skipWhitespace(tokens, i),
-        ];
+        if (tokens[i].type === 'LINE_BREAK') {
+          return [
+            {
+              type: 'TITLE',
+              payload: {
+                level: ({'EQUAL': 1, 'DASH': 2})[type],
+                children: handleInline(children),
+              }
+            },
+            skipWhitespace(tokens, i),
+          ];
+        }
       }
     }
     if (
