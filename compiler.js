@@ -1,3 +1,5 @@
+const assert = require('assert');
+
 function buildAttributes(attrs) {
   const result = Object.entries(attrs)
     .map(([k, v]) => `${k}="${v}"`)
@@ -27,6 +29,10 @@ function compiler({ type, payload }) {
     case 'LINE_BREAK':
       return '<br>';
     case 'TITLE':
+      assert(
+        1 <= payload.level && payload.level <= 6,
+        'level of title must be between 1 to 6'
+      );
       return wrap(`h${payload.level}`, compileChildren(payload.children));
     case 'PARAGRAPH':
       return wrap('p', compileChildren(payload.children));
