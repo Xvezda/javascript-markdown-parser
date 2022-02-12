@@ -60,7 +60,7 @@ function handleLink(tokens, index) {
 
   let i;
   for (i = index + 1; i < tokens.length; ++i) {
-    if (tokens[i].type === 'CLOSE_BRACKET') {
+    if (tokens[i].type === 'CLOSE_BRACK') {
       ++i;
       break;
     }
@@ -98,7 +98,7 @@ function handleInline(tokens) {
   for (let i = 0; i < tokens.length; ++i) {
     switch (tokens[i].type) {
       case 'BANG': {
-        if (peek(tokens, i+1).type === 'OPEN_BRACKET') {
+        if (peek(tokens, i+1).type === 'OPEN_BRACK') {
           const [link, index] = handleLink(tokens, i+1);
           if (!link) {
             children.push(tokens[i]);
@@ -117,7 +117,7 @@ function handleInline(tokens) {
         }
         break;
       }
-      case 'OPEN_BRACKET': {
+      case 'OPEN_BRACK': {
         const [link, index] = handleLink(tokens, i);
         if (!link) {
           children.push(tokens[i]);
@@ -207,7 +207,7 @@ function parser(tokens) {
         // fallthrough
       }
       case 'BANG':
-      case 'OPEN_BRACKET':
+      case 'OPEN_BRACK':
       case 'SPACE':
       case 'WORD': {
         const [block, index] = handleWord(tokens, i);

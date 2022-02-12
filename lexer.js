@@ -16,9 +16,9 @@ function getType(token) {
   } else if (token === ')') {
     return 'CLOSE_PAREN';
   } else if (token === '[') {
-    return 'OPEN_BRACKET';
+    return 'OPEN_BRACK';
   } else if (token === ']') {
-    return 'CLOSE_BRACKET';
+    return 'CLOSE_BRACK';
   } else {
     return 'WORD';
   }
