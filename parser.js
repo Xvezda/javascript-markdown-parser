@@ -146,8 +146,8 @@ function handleWord(tokens, index) {
         peek(tokens, i+1).type === 'DASH'
       ) {
         const type = peek(tokens, i+1).type;
-        i = skip(type)(tokens, i+1);
-        if (tokens[i].type === 'LINE_BREAK') {
+        const skipped = skip(type)(tokens, i+1);
+        if (tokens[skipped].type === 'LINE_BREAK') {
           return [
             {
               type: 'TITLE',
@@ -156,7 +156,7 @@ function handleWord(tokens, index) {
                 children: handleInline(children),
               }
             },
-            skipWhitespace(tokens, i),
+            skipWhitespace(tokens, skipped),
           ];
         }
       }
@@ -215,6 +215,9 @@ function parser(tokens) {
         i = index;
         continue;
       }
+      case 'LINE_BREAK':
+        i = skipWhitespace(tokens, i);
+        break;
       default:
         throw new Error(
           `unexpected token: ${i}:${token.type}:${token.payload.value}`);

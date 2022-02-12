@@ -22,3 +22,5 @@ exports[`줄바꿈 2`] = `
 <p>foo</p>
 <p>bar</p>
 `;
+
+exports[`줄바꿈 3`] = `<p>foo</p>`;

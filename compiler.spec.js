@@ -71,6 +71,15 @@ foo
 bar
 `;
   expect(mdToHtml(p)).toMatchSnapshot();
+
+  const nop = `\
+
+
+
+foo
+`;
+  expect(mdToHtml(nop)).toMatchSnapshot();
+
 });
 
 test('링크', () => {
