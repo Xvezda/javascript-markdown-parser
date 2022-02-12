@@ -1,26 +1,28 @@
 function getType(token) {
-  if (token === '#') {
-    return 'SHARP';
-  } else if (token === '-') {
-    return 'DASH';
-  } else if (token === '=') {
-    return 'EQUAL';
-  } else if (token === '!') {
-    return 'BANG';
-  } else if (/ +/.test(token)) {
+  if (/ +/.test(token)) {
     return 'SPACE';
   } else if (/\n+/.test(token)) {
     return 'LINE_BREAK';
-  } else if (token === '(') {
-    return 'OPEN_PAREN';
-  } else if (token === ')') {
-    return 'CLOSE_PAREN';
-  } else if (token === '[') {
-    return 'OPEN_BRACK';
-  } else if (token === ']') {
-    return 'CLOSE_BRACK';
-  } else {
-    return 'WORD';
+  }
+  switch (token) {
+    case '#':
+      return 'SHARP';
+    case '-':
+      return 'DASH';
+    case '=':
+      return 'EQUAL';
+    case '!':
+      return 'BANG';
+    case '(':
+      return 'OPEN_PAREN';
+    case ')':
+      return 'CLOSE_PAREN';
+    case '[':
+      return 'OPEN_BRACK';
+    case ']':
+      return 'CLOSE_BRACK';
+    default:
+      return 'WORD';
   }
 }
 
