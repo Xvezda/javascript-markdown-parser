@@ -98,6 +98,29 @@ function handleLink(tokens, index) {
   ];
 }
 
+function handleInlineCode(tokens, index) {
+  const children = [];
+  let i = index + 1;
+  for (; i < tokens.length; ++i) {
+    if (tokens[i].type === 'BACKTICK')
+      break;
+
+    children.push(tokens[i]);
+  }
+  if (peek(tokens, i).type !== 'BACKTICK') {
+    return [null, index];
+  }
+  return [
+    {
+      type: 'INLINE_CODE',
+      payload: {
+        code: children.map(child => child.payload.value).join(' '),
+      }
+    },
+    i
+  ];
+}
+
 function handleInline(tokens) {
   const children = [];
   for (let i = 0; i < tokens.length; ++i) {
@@ -130,6 +153,17 @@ function handleInline(tokens) {
           continue;
         }
         children.push(link);
+        i = index;
+        break;
+      }
+      case 'BACKTICK': {
+        const [code, index] = handleInlineCode(tokens, i);
+        if (!code) {
+          children.push(tokens[i]);
+          ++i;
+          continue;
+        }
+        children.push(code);
         i = index;
         break;
       }
@@ -211,6 +245,7 @@ function parser(tokens) {
         }
         // fallthrough
       }
+      case 'BACKTICK':
       case 'BANG':
       case 'OPEN_BRACK':
       case 'SPACE':

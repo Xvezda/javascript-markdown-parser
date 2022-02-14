@@ -93,3 +93,10 @@ test('이미지', () => {
   expect(mdToHtml('![random image](https://unsplash.it/100)'))
     .toMatchSnapshot();
 });
+
+test('인라인 코드', () => {
+  expect(mdToHtml('`foo`')).toMatch('<code>foo</code>');
+
+  expect(mdToHtml('`<b>foo</b>`'))
+    .toMatch('<code>&lt;b&gt;foo&lt;/b&gt;</code>');
+});

@@ -46,6 +46,11 @@ function compiler({ type, payload }) {
       return `
         <img src="${payload.url}" alt="${payload.alt}">
       `.trim();
+    case 'INLINE_CODE':
+      return wrap(
+        'code',
+        payload.code.replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      );
     case 'WORD':
     default:
       return payload.value;

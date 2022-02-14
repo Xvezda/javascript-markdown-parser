@@ -21,6 +21,8 @@ function getType(token) {
       return 'OPEN_BRACK';
     case ']':
       return 'CLOSE_BRACK';
+    case '`':
+      return 'BACKTICK';
     default:
       return 'WORD';
   }
