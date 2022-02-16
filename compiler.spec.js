@@ -105,7 +105,10 @@ test('코드 블럭', () => {
   const code = `\
 \`\`\`
 foo
+bar
 \`\`\`
 `;
-  expect(mdToHtml(code)).toMatch('<pre><code>foo</code></pre>');
+  expect(mdToHtml(code)).toMatch(`\
+<pre><code>foo
+bar</code></pre>`);
 });
