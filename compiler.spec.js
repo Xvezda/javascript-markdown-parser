@@ -100,3 +100,12 @@ test('인라인 코드', () => {
   expect(mdToHtml('`<b>foo</b>`'))
     .toMatch('<code>&lt;b&gt;foo&lt;/b&gt;</code>');
 });
+
+test('코드 블럭', () => {
+  const code = `\
+\`\`\`
+foo
+\`\`\`
+`;
+  expect(mdToHtml(code)).toMatch('<pre><code>foo</code></pre>');
+});
