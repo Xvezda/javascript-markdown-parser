@@ -51,6 +51,13 @@ function compiler({ type, payload }) {
         'code',
         payload.code.replace(/</g, '&lt;').replace(/>/g, '&gt;')
       );
+    case 'CODE':
+      return wrap(
+        'pre',
+        wrap('code', payload.children
+          .map(({ payload }) => payload.value)
+          .join(''))
+      );
     case 'WORD':
     default:
       return payload.value;

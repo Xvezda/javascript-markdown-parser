@@ -27,8 +27,12 @@ const skipWhitespace = skip((tokens, i) =>
   tokens[i].type === 'SPACE' || tokens[i].type === 'LINE_BREAK');
 
 function handleTitle(tokens, index) {
-  let i;
-  for (i = index; i < tokens.length; ++i) {
+  let i = index;
+  if (tokens[i].type !== 'SHARP') {
+    return [null, index];
+  }
+
+  for (; i < tokens.length; ++i) {
     if (tokens[i].type !== 'SHARP')
       break;
   }
@@ -57,6 +61,43 @@ function handleTitle(tokens, index) {
       }
     },
     skipWhitespace(tokens, i)
+  ];
+}
+
+function handleCode(tokens, index) {
+  const children = [];
+
+  let i = index;
+  if (
+    tokens[i].type === 'BACKTICK' &&
+    peek(tokens, i+1).type === 'BACKTICK' &&
+    peek(tokens, i+2).type === 'BACKTICK' &&
+    peek(tokens, i+3).type === 'LINE_BREAK'
+  ) {
+    for (i = skipWhitespace(tokens, i + 3); i < tokens.length; ++i) {
+      if (
+        tokens[i].type === 'LINE_BREAK' &&
+        peek(tokens, i+1).type === 'BACKTICK' &&
+        peek(tokens, i+2).type === 'BACKTICK' &&
+        peek(tokens, i+3).type === 'BACKTICK'
+      ) {
+        i += 4;
+        break;
+      }
+      children.push(tokens[i]);
+    }
+  } else {
+    return [null, index];
+  }
+
+  return [
+    {
+      type: 'CODE',
+      payload: {
+        children,
+      }
+    },
+    i,
   ];
 }
 
@@ -245,7 +286,15 @@ function parser(tokens) {
         }
         // fallthrough
       }
-      case 'BACKTICK':
+      case 'BACKTICK': {
+        const [block, index] = handleCode(tokens, i);
+        if (block) {
+          blocks.push(block);
+          i = index;
+          continue;
+        }
+        // fallthrough
+      }
       case 'BANG':
       case 'OPEN_BRACK':
       case 'SPACE':
