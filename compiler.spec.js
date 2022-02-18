@@ -119,5 +119,17 @@ bar
   expect(mdToHtml(code)).toMatch(`\
 <pre><code>foo
 bar</code></pre>`);
+
+  code = `\
+\`\`\`
+foo
+<>
+bar
+\`\`\`
+`;
+  expect(mdToHtml(code)).toMatch(`\
+<pre><code>foo
+&lt;&gt;
+bar</code></pre>`);
 });
 
