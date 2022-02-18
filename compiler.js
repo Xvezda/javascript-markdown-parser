@@ -20,6 +20,13 @@ function compileChildren(children) {
     .trim();
 }
 
+function escapeHtml(html) {
+  // TODO: HTML Entities 추가
+  return html
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
 function compiler({ type, payload }) {
   switch (type) {
     case 'DOCUMENT':
@@ -49,14 +56,15 @@ function compiler({ type, payload }) {
     case 'INLINE_CODE':
       return wrap(
         'code',
-        payload.code.replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        escapeHtml(payload.code)
       );
     case 'CODE':
       return wrap(
         'pre',
-        wrap('code', payload.children
-          .map(({ payload }) => payload.value)
-          .join(''))
+        wrap('code',
+          escapeHtml(payload.children
+            .map(({ payload }) => payload.value)
+            .join('')))
       );
     case 'WORD':
     default:
