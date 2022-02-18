@@ -102,7 +102,15 @@ test('인라인 코드', () => {
 });
 
 test('코드 블럭', () => {
-  const code = `\
+  let code = `\
+\`\`\`
+foo
+\`\`\`
+`;
+  expect(mdToHtml(code)).toMatch(`\
+<pre><code>foo</code></pre>`);
+
+  code = `\
 \`\`\`
 foo
 bar
@@ -112,3 +120,4 @@ bar
 <pre><code>foo
 bar</code></pre>`);
 });
+
