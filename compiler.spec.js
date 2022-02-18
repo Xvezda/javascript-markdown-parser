@@ -101,6 +101,12 @@ test('인라인 코드', () => {
     .toMatch('<code>&lt;b&gt;foo&lt;/b&gt;</code>');
 });
 
+test('인라인 코드 예외 처리', () => {
+  expect(mdToHtml('``foo``')).toMatch('<code>foo</code>');
+  expect(mdToHtml('``foo`')).toMatch('``foo`');
+  expect(mdToHtml('`foo``')).toMatch('`foo``');
+});
+
 test('코드 블럭', () => {
   let code = `\
 \`\`\`
