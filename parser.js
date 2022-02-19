@@ -141,30 +141,41 @@ function handleLink(tokens, index) {
 
 function handleInlineCode(tokens, index) {
   const children = [];
-  let i = index + 1;
-  for (; i < tokens.length; ++i) {
-    if (tokens[i].type === 'BACKTICK')
-      break;
+  const skipBacktick = skip('BACKTICK');
 
-    children.push(tokens[i]);
-  }
-  if (peek(tokens, i).type !== 'BACKTICK') {
-    return [null, index];
-  }
-  return [
-    {
-      type: 'INLINE_CODE',
-      payload: {
-        code: children.map(child => child.payload.value).join(' '),
+  const count = skipBacktick(tokens, index) - index;
+  let i = index + count;
+
+  while (i < tokens.length) {
+    if (tokens[i].type === 'BACKTICK') {
+      const skipIdx = skipBacktick(tokens, i);
+      if (count !== skipIdx - i) {
+        children.push(...tokens.slice(i, skipIdx));
+        i = skipIdx;
+        continue;
       }
-    },
-    i
-  ];
+
+      return [
+        {
+          type: 'INLINE_CODE',
+          payload: {
+            code: children
+              .map(child => child.payload.value)
+              .join(''),
+          }
+        },
+        skipIdx,
+      ];
+    }
+    children.push(tokens[i]);
+    ++i;
+  }
+  return [null, i];
 }
 
 function handleInline(tokens) {
   const children = [];
-  for (let i = 0; i < tokens.length; ++i) {
+  for (let i = 0; i < tokens.length;) {
     switch (tokens[i].type) {
       case 'BANG': {
         if (peek(tokens, i+1).type === 'OPEN_BRACK') {
@@ -200,8 +211,8 @@ function handleInline(tokens) {
       case 'BACKTICK': {
         const [code, index] = handleInlineCode(tokens, i);
         if (!code) {
-          children.push(tokens[i]);
-          ++i;
+          children.push(...tokens.slice(i, index));
+          i = index;
           continue;
         }
         children.push(code);
@@ -210,6 +221,7 @@ function handleInline(tokens) {
       }
       default:
         children.push(tokens[i]);
+        ++i;
         break;
     }
   }
