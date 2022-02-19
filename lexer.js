@@ -1,8 +1,6 @@
 function getType(token) {
   if (/ +/.test(token)) {
     return 'SPACE';
-  } else if (/\n+/.test(token)) {
-    return 'LINE_BREAK';
   }
   switch (token) {
     case '#':
@@ -23,6 +21,8 @@ function getType(token) {
       return 'CLOSE_BRACK';
     case '`':
       return 'BACKTICK';
+    case '\n':
+      return 'LINE_BREAK';
     default:
       return 'WORD';
   }

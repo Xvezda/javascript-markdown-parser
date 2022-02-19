@@ -74,7 +74,7 @@ function handleCode(tokens, index) {
     peek(tokens, i+2).type === 'BACKTICK' &&
     peek(tokens, i+3).type === 'LINE_BREAK'
   ) {
-    for (i = skipWhitespace(tokens, i + 3); i < tokens.length; ++i) {
+    for (i = i + 4; i < tokens.length; ++i) {
       if (
         tokens[i].type === 'LINE_BREAK' &&
         peek(tokens, i+1).type === 'BACKTICK' &&
@@ -255,7 +255,7 @@ function handleWord(tokens, index) {
     }
     if (
       tokens[i].type === 'LINE_BREAK' &&
-      tokens[i].payload.value.length > 1 ||
+      peek(tokens, i+1).type === 'LINE_BREAK' ||
       tokens[i].type === 'LINE'
     ) {
       break;
