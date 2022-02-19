@@ -105,6 +105,9 @@ test('인라인 코드 예외 처리', () => {
   expect(mdToHtml('``foo``')).toMatch('<code>foo</code>');
   expect(mdToHtml('``foo`')).toMatch('``foo`');
   expect(mdToHtml('`foo``')).toMatch('`foo``');
+  expect(mdToHtml('`foo``bar`baz`')).toMatch('<code>foo``bar</code>baz`');
+  expect(mdToHtml('``foo``bar`baz`'))
+    .toMatch('<code>foo</code>bar<code>baz</code>');
 });
 
 test('코드 블럭', () => {
