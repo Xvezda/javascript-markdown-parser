@@ -159,4 +159,9 @@ test('가로줄', () => {
   expect(mdToHtml(' - - -')).toBe('<hr>');
   expect(mdToHtml('- - -')).toBe('<hr>');
   expect(mdToHtml('  -  - -  ')).toBe('<hr>');
+  expect(mdToHtml('-  -- -  - ')).toBe('<hr>');
+  expect(mdToHtml('***')).toBe('<hr>');
+  expect(mdToHtml('  ***')).toBe('<hr>');
+  expect(mdToHtml('* * *')).toBe('<hr>');
+  expect(mdToHtml(' *   * **   *')).toBe('<hr>');
 });
