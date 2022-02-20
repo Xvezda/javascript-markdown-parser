@@ -26,17 +26,31 @@ const skip = condition => (tokens, index) => {
 const skipWhitespace = skip((tokens, i) =>
   tokens[i].type === 'SPACE' || tokens[i].type === 'LINE_BREAK');
 
+const nonSpaceIdx = (tokens, i) => skip('SPACE')(tokens, i);
+
 function handleLine(tokens, index) {
-  const nonSpaceIdx = (tokens, i) => skip('SPACE')(tokens, i);
+  const token = peek(tokens, index);
+  if (token.type !== 'DASH' && token.type !== 'ASTERISK') {
+    return [null, index];
+  }
 
   let i = nonSpaceIdx(tokens, index+1);
-  if (peek(tokens, i).type === 'DASH') {
+  if (peek(tokens, i).type === token.type) {
     i = nonSpaceIdx(tokens, i+1);
-    if (peek(tokens, i).type === 'DASH') {
-      return [
-        { type: 'LINE' },
-        skipWhitespace(tokens, i+1)
-      ];
+    if (peek(tokens, i).type === token.type) {
+      const skipPattern = skip((tokens, i) =>
+        tokens[i].type === 'SPACE' || tokens[i].type === token.type);
+
+      i = skipPattern(tokens, i);
+      if (
+        peek(tokens, i).type === 'LINE_BREAK' ||
+        peek(tokens, i).type === 'END'
+      ) {
+        return [
+          { type: 'LINE' },
+          skipWhitespace(tokens, i+1)
+        ];
+      }
     }
   }
   return [null, index];
@@ -295,6 +309,7 @@ function parser(tokens) {
   for (let i = 0; i < tokens.length; ) {
     const token = tokens[i];
     switch (token.type) {
+      case 'ASTERISK':
       case 'DASH': {
         const [line, index] = handleLine(tokens, i);
         if (line) {

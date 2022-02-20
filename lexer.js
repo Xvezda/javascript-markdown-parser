@@ -3,6 +3,8 @@ function getType(token) {
     return 'SPACE';
   }
   switch (token) {
+    case '*':
+      return 'ASTERISK';
     case '#':
       return 'SHARP';
     case '-':
