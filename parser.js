@@ -26,6 +26,22 @@ const skip = condition => (tokens, index) => {
 const skipWhitespace = skip((tokens, i) =>
   tokens[i].type === 'SPACE' || tokens[i].type === 'LINE_BREAK');
 
+function handleLine(tokens, index) {
+  const nonSpaceIdx = (tokens, i) => skip('SPACE')(tokens, i);
+
+  let i = nonSpaceIdx(tokens, index+1);
+  if (peek(tokens, i).type === 'DASH') {
+    i = nonSpaceIdx(tokens, i+1);
+    if (peek(tokens, i).type === 'DASH') {
+      return [
+        { type: 'LINE' },
+        skipWhitespace(tokens, i+1)
+      ];
+    }
+  }
+  return [null, index];
+}
+
 function handleTitle(tokens, index) {
   let i = index;
   if (tokens[i].type !== 'SHARP') {
@@ -279,16 +295,15 @@ function parser(tokens) {
   for (let i = 0; i < tokens.length; ) {
     const token = tokens[i];
     switch (token.type) {
-      case 'DASH':
-        if (
-          peek(tokens, i+1).type === 'DASH' &&
-          peek(tokens, i+2).type === 'DASH'
-        ) {
-          blocks.push({ type: 'LINE' });
-          i = skipWhitespace(tokens, i+1);
+      case 'DASH': {
+        const [line, index] = handleLine(tokens, i);
+        if (line) {
+          blocks.push(line);
+          i = index;
           continue;
         }
         // fallthrough
+      }
       case 'SHARP': {
         const [block, index] = handleTitle(tokens, i);
         if (block) {
@@ -309,11 +324,14 @@ function parser(tokens) {
       }
       case 'BANG':
       case 'OPEN_BRACK':
-      case 'SPACE':
       case 'WORD': {
         const [block, index] = handleWord(tokens, i);
         blocks.push(block);
         i = index;
+        continue;
+      }
+      case 'SPACE': {
+        i = skip('SPACE')(tokens, i);
         continue;
       }
       case 'LINE_BREAK':
