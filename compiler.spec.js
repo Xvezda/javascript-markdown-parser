@@ -165,3 +165,9 @@ test('가로줄', () => {
   expect(mdToHtml('* * *')).toBe('<hr>');
   expect(mdToHtml(' *   * **   *')).toBe('<hr>');
 });
+
+test('가로줄 예외 처리', () => {
+  expect(mdToHtml('**')).toMatch('**');
+  expect(mdToHtml('--')).toMatch('--');
+  expect(mdToHtml('**-')).toMatch('**-');
+});
