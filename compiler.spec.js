@@ -57,6 +57,12 @@ foo
 `
   expect(mdToHtml(invalidLine)).toMatchSnapshot();
 
+  const spaceBetween = `\
+foo
+--- -
+`;
+  expect(mdToHtml(spaceBetween)).toMatchSnapshot();
+
   const levelSeven = '#'.repeat(7) + ' foo';
   expect(mdToHtml(levelSeven)).toMatchSnapshot();
 });
