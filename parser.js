@@ -263,13 +263,16 @@ function handleWord(tokens, index) {
   let i;
   for (i = index; i < tokens.length; ++i) {
     if (tokens[i].type === 'LINE_BREAK') {
+      if (peek(tokens, i+1).type === 'LINE_BREAK')
+        break;
+
       if (
         peek(tokens, i+1).type === 'EQUAL' ||
         peek(tokens, i+1).type === 'DASH'
       ) {
         const type = peek(tokens, i+1).type;
         const skipped = skip(type)(tokens, i+1);
-        if (tokens[skipped].type === 'LINE_BREAK') {
+        if (peek(tokens, skipped).type === 'LINE_BREAK') {
           return [
             {
               type: 'TITLE',
@@ -281,14 +284,14 @@ function handleWord(tokens, index) {
             skipWhitespace(tokens, skipped),
           ];
         }
+        const skipLinePattern = skip((tokens, i) =>
+          tokens[i].type === type || tokens[i].type === 'SPACE');
+        const isLine = (tokens, i) =>
+          peek(tokens, skipLinePattern(tokens, i)).type === 'LINE_BREAK';
+
+        if (isLine(tokens, skipped))
+          break;
       }
-    }
-    if (
-      tokens[i].type === 'LINE_BREAK' &&
-      peek(tokens, i+1).type === 'LINE_BREAK' ||
-      tokens[i].type === 'LINE'
-    ) {
-      break;
     }
     children.push(tokens[i]);
   }
