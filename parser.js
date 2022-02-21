@@ -66,7 +66,7 @@ function handleTitle(tokens, index) {
     if (tokens[i].type !== 'SHARP')
       break;
   }
-  if (tokens[i].type !== 'SPACE') {
+  if (peek(tokens, i).type !== 'SPACE') {
     return [null, index];
   }
 
@@ -143,7 +143,7 @@ function handleLink(tokens, index) {
     children.push(tokens[i]);
   }
 
-  if (tokens[i].type !== 'OPEN_PAREN') {
+  if (peek(tokens, i).type !== 'OPEN_PAREN') {
     return [null, index];
   }
   ++i;
