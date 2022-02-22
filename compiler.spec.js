@@ -95,6 +95,11 @@ test('링크', () => {
   expect(mdToHtml('[google](https://www.google.com)')).toMatchSnapshot();
 });
 
+test('링크 예외 처리', () => {
+  expect(mdToHtml('[]()')).toMatch('<a href=""></a>');
+  expect(mdToHtml('[] ()')).toMatch('[] ()');
+});
+
 test('이미지', () => {
   expect(mdToHtml('![random image](https://unsplash.it/100)'))
     .toMatchSnapshot();
