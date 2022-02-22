@@ -312,6 +312,13 @@ function parser(tokens) {
   for (let i = 0; i < tokens.length; ) {
     const token = tokens[i];
     switch (token.type) {
+      case 'LINE_BREAK':
+        i = skipWhitespace(tokens, i);
+        continue;
+      case 'SPACE': {
+        i = skip('SPACE')(tokens, i);
+        continue;
+      }
       case 'ASTERISK':
       case 'DASH': {
         const [line, index] = handleLine(tokens, i);
@@ -342,22 +349,12 @@ function parser(tokens) {
       }
       case 'BANG':
       case 'OPEN_BRACK':
-      case 'WORD': {
+      case 'WORD':
+      default: {
         const [block, index] = handleWord(tokens, i);
         blocks.push(block);
         i = index;
-        continue;
       }
-      case 'SPACE': {
-        i = skip('SPACE')(tokens, i);
-        continue;
-      }
-      case 'LINE_BREAK':
-        i = skipWhitespace(tokens, i);
-        break;
-      default:
-        throw new Error(
-          `unexpected token: ${i}:${token.type}:${token.payload.value}`);
     }
   }
 
