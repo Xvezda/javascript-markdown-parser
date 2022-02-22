@@ -224,6 +224,9 @@ function handleInline(tokens) {
             },
           });
           i = index;
+        } else {
+          children.push(tokens[i]);
+          ++i;
         }
         break;
       }
