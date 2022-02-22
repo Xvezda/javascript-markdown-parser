@@ -30,10 +30,6 @@ const nonSpaceIdx = (tokens, i) => skip('SPACE')(tokens, i);
 
 function handleLine(tokens, index) {
   const token = peek(tokens, index);
-  if (token.type !== 'DASH' && token.type !== 'ASTERISK') {
-    return [null, index];
-  }
-
   let i = nonSpaceIdx(tokens, index+1);
   if (peek(tokens, i).type === token.type) {
     i = nonSpaceIdx(tokens, i+1);
