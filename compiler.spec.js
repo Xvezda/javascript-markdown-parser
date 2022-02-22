@@ -105,6 +105,13 @@ test('이미지', () => {
     .toMatchSnapshot();
 });
 
+test('이미지 예외 처리', () => {
+  expect(mdToHtml('![]()')).toMatch('<img src="" alt="">');
+  expect(mdToHtml('![] ()')).toMatch('![] ()');
+  expect(mdToHtml('! []()')).toMatch('! <a href=""></a>');
+  expect(mdToHtml('! [] ()')).toMatch('! [] ()');
+});
+
 test('인라인 코드', () => {
   expect(mdToHtml('`foo`')).toMatch('<code>foo</code>');
 
