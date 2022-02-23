@@ -10,8 +10,14 @@ function mdToHtml(md) {
   return html;
 }
 
+const markdown = (strings, ...args) =>
+  mdToHtml(
+    strings[0] + strings
+      .slice(1)
+      .reduce((acc, s, i) => acc + args[i] + s, ''));
+
 test('복합 마크다운 변환', () => {
-  const md = `\
+  expect(markdown`\
 # hello world
 ## hi
 
@@ -21,191 +27,188 @@ egg
 ham
 spam
 
-link to [Google](http://google.com)`;
-
-  expect(mdToHtml(md)).toMatchSnapshot();
+link to [Google](http://google.com)`).toMatchSnapshot();
 });
 
 test('제목 변환', () => {
-  expect(mdToHtml('# foo')).toMatch('<h1>foo</h1>');
-  expect(mdToHtml('## foo')).toMatch('<h2>foo</h2>');
-  expect(mdToHtml('### foo')).toMatch('<h3>foo</h3>');
-  expect(mdToHtml('#### foo')).toMatch('<h4>foo</h4>');
-  expect(mdToHtml('##### foo')).toMatch('<h5>foo</h5>');
-  expect(mdToHtml('###### foo')).toMatch('<h6>foo</h6>');
+  expect(markdown`# foo`).toMatch('<h1>foo</h1>');
+  expect(markdown`## foo`).toMatch('<h2>foo</h2>');
+  expect(markdown`### foo`).toMatch('<h3>foo</h3>');
+  expect(markdown`#### foo`).toMatch('<h4>foo</h4>');
+  expect(markdown`##### foo`).toMatch('<h5>foo</h5>');
+  expect(markdown`###### foo`).toMatch('<h6>foo</h6>');
 
-  const h1 = `\
+  const h1 = markdown`\
 foo
 ===
 `;
-  expect(mdToHtml(h1)).toMatch('<h1>foo</h1>')
+  expect(h1).toMatch('<h1>foo</h1>')
 
-  const h2 = `\
+  const h2 = markdown`\
 foo
 ---
 `;
-  expect(mdToHtml(h2)).toMatch('<h2>foo</h2>');
+  expect(h2).toMatch('<h2>foo</h2>');
 });
 
 test('올바르지 않은 제목 문법 처리', () => {
-  const noSpace = '#foo';
-  expect(mdToHtml(noSpace)).toMatchSnapshot();
+  const noSpace = markdown`#foo`;
+  expect(noSpace).toMatchSnapshot();
 
-  const invalidLine = `\
+  const invalidLine = markdown`\
 foo
 ---=
 `
-  expect(mdToHtml(invalidLine)).toMatchSnapshot();
+  expect(invalidLine).toMatchSnapshot();
 
-  const spaceBetween = `\
+  const spaceBetween = markdown`\
 foo
 --- -
 `;
-  expect(mdToHtml(spaceBetween)).toMatchSnapshot();
+  expect(spaceBetween).toMatchSnapshot();
 
-  const levelSeven = '#'.repeat(7) + ' foo';
-  expect(mdToHtml(levelSeven)).toMatchSnapshot();
+  const levelSeven = markdown`${'#'.repeat(7)} foo`;
+  expect(levelSeven).toMatchSnapshot();
 });
 
 test('줄바꿈', () => {
-  const br = `\
+  const br = markdown`\
 foo
 bar
 `;
-  expect(mdToHtml(br)).toMatchSnapshot();
+  expect(br).toMatchSnapshot();
 
-  const p = `\
+  const p = markdown`\
 foo
 
 bar
 `;
-  expect(mdToHtml(p)).toMatchSnapshot();
+  expect(p).toMatchSnapshot();
 
-  const nop = `\
+  const nop = markdown`\
 
 
 
 foo
 `;
-  expect(mdToHtml(nop)).toMatchSnapshot();
-
+  expect(nop).toMatchSnapshot();
 });
 
 test('링크', () => {
-  expect(mdToHtml('[google](https://www.google.com)')).toMatchSnapshot();
+  expect(markdown`[google](https://www.google.com)`).toMatchSnapshot();
 });
 
 test('링크 예외 처리', () => {
-  expect(mdToHtml('[]()')).toMatch('<a href=""></a>');
-  expect(mdToHtml('[] ()')).toMatch('[] ()');
+  expect(markdown`[]()`).toMatch('<a href=""></a>');
+  expect(markdown`[] ()`).toMatch('[] ()');
 });
 
 test('이미지', () => {
-  expect(mdToHtml('![random image](https://unsplash.it/100)'))
+  expect(markdown`![random image](https://unsplash.it/100)`)
     .toMatchSnapshot();
 });
 
 test('이미지 예외 처리', () => {
-  expect(mdToHtml('![]()')).toMatch('<img src="" alt="">');
-  expect(mdToHtml('![] ()')).toMatch('![] ()');
-  expect(mdToHtml('! []()')).toMatch('! <a href=""></a>');
-  expect(mdToHtml('! [] ()')).toMatch('! [] ()');
+  expect(markdown`![]()`).toMatch('<img src="" alt="">');
+  expect(markdown`![] ()`).toMatch('![] ()');
+  expect(markdown`! []()`).toMatch('! <a href=""></a>');
+  expect(markdown`! [] ()`).toMatch('! [] ()');
 });
 
 test('인라인 코드', () => {
-  expect(mdToHtml('`foo`')).toMatch('<code>foo</code>');
+  expect(markdown`\`foo\``).toMatch('<code>foo</code>');
 
-  expect(mdToHtml('`<b>foo</b>`'))
+  expect(markdown`\`<b>foo</b>\``)
     .toMatch('<code>&lt;b&gt;foo&lt;/b&gt;</code>');
 });
 
 test('인라인 코드 예외 처리', () => {
-  expect(mdToHtml('``foo``')).toMatch('<code>foo</code>');
-  expect(mdToHtml('``foo`')).toMatch('``foo`');
-  expect(mdToHtml('`foo``')).toMatch('`foo``');
-  expect(mdToHtml('`foo``bar`baz`')).toMatch('<code>foo``bar</code>baz`');
-  expect(mdToHtml('``foo``bar`baz`'))
+  expect(markdown`\`\`foo\`\``).toMatch('<code>foo</code>');
+  expect(markdown`\`\`foo\``).toMatch('``foo`');
+  expect(markdown`\`foo\`\``).toMatch('`foo``');
+  expect(markdown`\`foo\`\`bar\`baz\``).toMatch('<code>foo``bar</code>baz`');
+  expect(markdown`\`\`foo\`\`bar\`baz\``)
     .toMatch('<code>foo</code>bar<code>baz</code>');
 });
 
 test('코드 블럭', () => {
-  let code = `\
+  let code = markdown`\
 \`\`\`
 foo
 \`\`\`
 `;
-  expect(mdToHtml(code)).toMatch(`\
+  expect(code).toMatch(`\
 <pre><code>foo</code></pre>`);
 
-  code = `\
+  code = markdown`\
 \`\`\`
 foo
 bar
 \`\`\`
 `;
-  expect(mdToHtml(code)).toMatch(`\
+  expect(code).toMatch(`\
 <pre><code>foo
 bar</code></pre>`);
 
-  code = `\
+  code = markdown`\
 \`\`\`
 foo
 <>
 bar
 \`\`\`
 `;
-  expect(mdToHtml(code)).toMatch(`\
+  expect(code).toMatch(`\
 <pre><code>foo
 &lt;&gt;
 bar</code></pre>`);
 
-  code = `\
+  code = markdown`\
 \`\`\`
 
 
 foo
 \`\`\`
 `;
-  expect(mdToHtml(code)).toMatch(`\
+  expect(code).toMatch(`\
 <pre><code>
 
 foo</code></pre>`);
 });
 
 test('가로줄', () => {
-  expect(mdToHtml('---')).toBe('<hr>');
-  expect(mdToHtml(' - - -')).toBe('<hr>');
-  expect(mdToHtml('- - -')).toBe('<hr>');
-  expect(mdToHtml('  -  - -  ')).toBe('<hr>');
-  expect(mdToHtml('-  -- -  - ')).toBe('<hr>');
-  expect(mdToHtml('***')).toBe('<hr>');
-  expect(mdToHtml('  ***')).toBe('<hr>');
-  expect(mdToHtml('* * *')).toBe('<hr>');
-  expect(mdToHtml(' *   * **   *')).toBe('<hr>');
+  expect(markdown`---`).toBe('<hr>');
+  expect(markdown` - - -`).toBe('<hr>');
+  expect(markdown`- - -`).toBe('<hr>');
+  expect(markdown`  -  - -  `).toBe('<hr>');
+  expect(markdown`-  -- -  - `).toBe('<hr>');
+  expect(markdown`***`).toBe('<hr>');
+  expect(markdown`  ***`).toBe('<hr>');
+  expect(markdown`* * *`).toBe('<hr>');
+  expect(markdown` *   * **   *`).toBe('<hr>');
 });
 
 test('가로줄 예외 처리', () => {
-  expect(mdToHtml('**')).toMatch('**');
-  expect(mdToHtml('--')).toMatch('--');
-  expect(mdToHtml('**-')).toMatch('**-');
+  expect(markdown`**`).toMatch('**');
+  expect(markdown`--`).toMatch('--');
+  expect(markdown`**-`).toMatch('**-');
 });
 
 test('이탤릭 스타일 텍스트', () => {
-  expect(mdToHtml('*hello*')).toMatch('<em>hello</em>');
-  expect(mdToHtml('_hello_')).toMatch('<em>hello</em>');
+  expect(markdown`*hello*`).toMatch('<em>hello</em>');
+  expect(markdown`_hello_`).toMatch('<em>hello</em>');
 });
 
 test('이탤릭 스타일 텍스트 예외 처리', () => {
-  expect(mdToHtml('foo*bar*')).toMatch('foo<em>bar</em>');
-  expect(mdToHtml('foo_bar_')).toMatch('foo_bar_');
-  expect(mdToHtml('foo _bar_')).toMatch('foo <em>bar</em>');
-  expect(mdToHtml('*foo *')).toMatch('*foo *');
-  expect(mdToHtml('_foo _')).toMatch('_foo _');
-  expect(mdToHtml('*foo bar*')).toMatch('<em>foo bar</em>');
-  expect(mdToHtml('_foo bar_')).toMatch('<em>foo bar</em>');
-  expect(mdToHtml('*foo*bar*')).toMatch('<em>foo</em>bar*');
-  expect(mdToHtml('_foo_bar_')).toMatch('<em>foo_bar</em>');
-  expect(mdToHtml('_ _')).toMatch('_ _');
+  expect(markdown`foo*bar*`).toMatch('foo<em>bar</em>');
+  expect(markdown`foo_bar_`).toMatch('foo_bar_');
+  expect(markdown`foo _bar_`).toMatch('foo <em>bar</em>');
+  expect(markdown`*foo *`).toMatch('*foo *');
+  expect(markdown`_foo _`).toMatch('_foo _');
+  expect(markdown`*foo bar*`).toMatch('<em>foo bar</em>');
+  expect(markdown`_foo bar_`).toMatch('<em>foo bar</em>');
+  expect(markdown`*foo*bar*`).toMatch('<em>foo</em>bar*');
+  expect(markdown`_foo_bar_`).toMatch('<em>foo_bar</em>');
+  expect(markdown`_ _`).toMatch('_ _');
   // TODO:
-  // expect(mdToHtml('* *'))
+  // expect(markdown`* *`)
 });
