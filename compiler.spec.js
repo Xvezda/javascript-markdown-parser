@@ -191,6 +191,11 @@ test('가로줄 예외 처리', () => {
   expect(markdown`**`).toMatch('**');
   expect(markdown`--`).toMatch('--');
   expect(markdown`**-`).toMatch('**-');
+  expect(markdown`***-`).toMatch('***-');
+  // TODO:
+  // expect(markdown`* - *`)
+  // expect(markdown`- - - *`)
+  // expect(markdown`* * * * -`)
 });
 
 test('이탤릭 스타일 텍스트', () => {
