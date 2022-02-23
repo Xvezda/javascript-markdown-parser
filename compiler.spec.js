@@ -189,3 +189,8 @@ test('가로줄 예외 처리', () => {
   expect(mdToHtml('--')).toMatch('--');
   expect(mdToHtml('**-')).toMatch('**-');
 });
+
+test('이탤릭 스타일 텍스트', () => {
+  expect(mdToHtml('*hello*')).toMatch('<em>hello</em>');
+  expect(mdToHtml('_hello_')).toMatch('<em>hello</em>');
+});
