@@ -194,3 +194,18 @@ test('이탤릭 스타일 텍스트', () => {
   expect(mdToHtml('*hello*')).toMatch('<em>hello</em>');
   expect(mdToHtml('_hello_')).toMatch('<em>hello</em>');
 });
+
+test('이탤릭 스타일 텍스트 예외 처리', () => {
+  expect(mdToHtml('foo*bar*')).toMatch('foo<em>bar</em>');
+  expect(mdToHtml('foo_bar_')).toMatch('foo_bar_');
+  expect(mdToHtml('foo _bar_')).toMatch('foo <em>bar</em>');
+  expect(mdToHtml('*foo *')).toMatch('*foo *');
+  expect(mdToHtml('_foo _')).toMatch('_foo _');
+  expect(mdToHtml('*foo bar*')).toMatch('<em>foo bar</em>');
+  expect(mdToHtml('_foo bar_')).toMatch('<em>foo bar</em>');
+  expect(mdToHtml('*foo*bar*')).toMatch('<em>foo</em>bar*');
+  expect(mdToHtml('_foo_bar_')).toMatch('<em>foo_bar</em>');
+  expect(mdToHtml('_ _')).toMatch('_ _');
+  // TODO:
+  // expect(mdToHtml('* *'))
+});
