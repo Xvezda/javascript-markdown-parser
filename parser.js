@@ -132,21 +132,21 @@ function handleLink(tokens, index) {
 
   let i;
   for (i = index + 1; i < tokens.length; ++i) {
-    if (tokens[i].type === 'CLOSE_BRACK') {
+    if (tokens[i].type === 'RIGHT_BRACKET') {
       ++i;
       break;
     }
     children.push(tokens[i]);
   }
 
-  if (peek(tokens, i).type !== 'OPEN_PAREN') {
+  if (peek(tokens, i).type !== 'LEFT_PARENTHESIS') {
     return [null, index];
   }
   ++i;
 
   let address = '';
   for (; i < tokens.length; ++i) {
-    if (tokens[i].type === 'CLOSE_PAREN') {
+    if (tokens[i].type === 'RIGHT_PARENTHESIS') {
       ++i;
       break;
     }
@@ -274,7 +274,7 @@ function handleInline(tokens) {
   for (let i = 0; i < tokens.length;) {
     switch (tokens[i].type) {
       case 'BANG': {
-        if (peek(tokens, i+1).type === 'OPEN_BRACK') {
+        if (peek(tokens, i+1).type === 'LEFT_BRACKET') {
           const [link, index] = handleLink(tokens, i+1);
           if (!link) {
             children.push(tokens[i]);
@@ -296,7 +296,7 @@ function handleInline(tokens) {
         }
         break;
       }
-      case 'OPEN_BRACK': {
+      case 'LEFT_BRACKET': {
         const [link, index] = handleLink(tokens, i);
         if (!link) {
           children.push(tokens[i]);
@@ -429,7 +429,7 @@ function parser(tokens) {
         // fallthrough
       }
       case 'BANG':
-      case 'OPEN_BRACK':
+      case 'LEFT_BRACKET':
       case 'WORD':
       default: {
         const [block, index] = handleWord(tokens, i);

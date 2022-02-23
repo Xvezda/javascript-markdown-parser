@@ -16,13 +16,13 @@ function getType(token) {
     case '!':
       return 'BANG';
     case '(':
-      return 'OPEN_PAREN';
+      return 'LEFT_PARENTHESIS';
     case ')':
-      return 'CLOSE_PAREN';
+      return 'RIGHT_PARENTHESIS';
     case '[':
-      return 'OPEN_BRACK';
+      return 'LEFT_BRACKET';
     case ']':
-      return 'CLOSE_BRACK';
+      return 'RIGHT_BRACKET';
     case '`':
       return 'BACKTICK';
     case '\n':
