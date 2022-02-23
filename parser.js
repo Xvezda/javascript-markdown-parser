@@ -199,6 +199,76 @@ function handleInlineCode(tokens, index) {
   return [null, i];
 }
 
+function handleItalic(tokens, index) {
+  /**
+   * ASTERISK: Lazy
+   * UNDERSCORE: Greedy
+   */
+  const type = tokens[index].type;
+  if (
+    type === 'UNDERSCORE' &&
+    peek(tokens, index-1).type !== 'SPACE' &&
+    peek(tokens, index-1).type !== 'END'
+  ) {
+    return [null, index+1];
+  }
+  const skipNonType = skip((tokens, i) =>
+    tokens[i].type !== type && tokens[i].type !== 'LINE_BREAK');
+  const skippedIdx = (() => {
+    let idx = skipNonType(tokens, index+1);
+    if (type === 'ASTERISK') {
+      return idx;
+    }
+
+    do {
+      const nextIdx = skipNonType(tokens, idx+1);
+      const nextToken = peek(tokens, nextIdx);
+      if (
+        nextToken.type === 'LINE_BREAK' ||
+        nextToken.type === 'END'
+      ) {
+        break;
+      }
+      idx = skipNonType(tokens, idx+1);
+    } while (true);
+
+    return idx;
+  })();
+
+  if (
+    peek(tokens, skippedIdx).type === 'LINE_BREAK' ||
+    peek(tokens, skippedIdx).type === 'END' ||
+    peek(tokens, skippedIdx-1).type === 'SPACE'
+  ) {
+    return [null, skippedIdx+1];
+  }
+  const children = tokens.slice(index+1, skippedIdx);
+  return [
+    {
+      type: 'ITALIC',
+      payload: {
+        children,
+      }
+    },
+    skippedIdx + 1,
+  ];
+}
+
+function handleStyledText(tokens, index) {
+  const type = tokens[index].type;
+  const skipType = skip(type);
+
+  const skippedIdx = skipType(tokens, index);
+  const count = skippedIdx - index;
+  switch (count) {
+    case 1:
+      return handleItalic(tokens, index);
+    // TODO: https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax#styling-text
+    default:
+      return [null, skippedIdx];
+  }
+}
+
 function handleInline(tokens) {
   const children = [];
   for (let i = 0; i < tokens.length;) {
@@ -245,6 +315,18 @@ function handleInline(tokens) {
           continue;
         }
         children.push(code);
+        i = index;
+        break;
+      }
+      case 'UNDERSCORE':
+      case 'ASTERISK': {
+        const [text, index] = handleStyledText(tokens, i);
+        if (!text) {
+          children.push(...tokens.slice(i, index));
+          i = index;
+          continue;
+        }
+        children.push(text);
         i = index;
         break;
       }

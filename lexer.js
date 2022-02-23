@@ -9,6 +9,8 @@ function getType(token) {
       return 'SHARP';
     case '-':
       return 'DASH';
+    case '_':
+      return 'UNDERSCORE';
     case '=':
       return 'EQUAL';
     case '!':

@@ -66,6 +66,8 @@ function compiler({ type, payload }) {
             .map(({ payload }) => payload.value)
             .join('')))
       );
+    case 'ITALIC':
+      return wrap('em', compileChildren(payload.children));
     case 'WORD':
     default:
       return payload.value;
