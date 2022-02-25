@@ -68,6 +68,8 @@ function compiler({ type, payload }) {
       );
     case 'ITALIC':
       return wrap('em', compileChildren(payload.children));
+    case 'BLOCKQUOTE':
+      return wrap('blockquote', compileChildren(payload.children));
     case 'WORD':
     default:
       return payload.value;

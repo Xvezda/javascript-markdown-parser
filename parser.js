@@ -400,6 +400,17 @@ function parser(tokens) {
         i = skip('SPACE')(tokens, i);
         continue;
       }
+      case 'RIGHT_CHEVRON': {
+        const [block, index] = handleWord(tokens, i+1);
+        blocks.push({
+          type: 'BLOCKQUOTE',
+          payload: {
+            children: [block],
+          }
+        });
+        i = index;
+        continue;
+      }
       case 'ASTERISK':
       case 'DASH': {
         const [line, index] = handleLine(tokens, i);
