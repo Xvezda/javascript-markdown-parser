@@ -23,6 +23,10 @@ function getType(token) {
       return 'LEFT_BRACKET';
     case ']':
       return 'RIGHT_BRACKET';
+    case '<':
+      return 'LEFT_CHEVRON';
+    case '>':
+      return 'RIGHT_CHEVRON';
     case '`':
       return 'BACKTICK';
     case '\n':
