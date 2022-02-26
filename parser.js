@@ -388,6 +388,19 @@ function handleWord(tokens, index) {
   ];
 }
 
+function handleBlockquote(tokens, index) {
+  const [block, i] = handleWord(tokens, index+1);
+  return [
+    {
+      type: 'BLOCKQUOTE',
+      payload: {
+        children: [block],
+      }
+    },
+    i,
+  ];
+}
+
 function parser(tokens) {
   const blocks = [];
   for (let i = 0; i < tokens.length; ) {
@@ -401,13 +414,8 @@ function parser(tokens) {
         continue;
       }
       case 'RIGHT_CHEVRON': {
-        const [block, index] = handleWord(tokens, i+1);
-        blocks.push({
-          type: 'BLOCKQUOTE',
-          payload: {
-            children: [block],
-          }
-        });
+        const [block, index] = handleBlockquote(tokens, i+1);
+        blocks.push(block);
         i = index;
         continue;
       }
