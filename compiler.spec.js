@@ -220,4 +220,14 @@ test('이탤릭 스타일 텍스트 예외 처리', () => {
 
 test('인용문', () => {
   expect(markdown`> foo`).toBe('<blockquote><p>foo</p></blockquote>');
+  expect(markdown`\
+> foo
+> bar
+`).toBe('<blockquote><p>foo<br>bar</p></blockquote>');
+  expect(markdown`\
+> foo
+> bar
+
+> baz
+`).toBe('<blockquote><p>foo<br>bar</p></blockquote><blockquote><p>baz</p></blockquote>');
 });
